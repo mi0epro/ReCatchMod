@@ -3,7 +3,7 @@
 #endif
 #define _catch_const_included
 
-#define CATCHMOD_VER "1.0-ReAPI"
+#define CATCHMOD_VER "1.0.1-ReAPI"
 #define MAXPLAYERSVAR MAX_PLAYERS + 1
 
 enum Teams

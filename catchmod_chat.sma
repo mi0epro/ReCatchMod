@@ -56,6 +56,11 @@ public CMD_Say(id)
 	new szMsg[192]
 	read_args(szMsg, charsmax(szMsg))
 	remove_quotes(szMsg)
+	trim(szMsg)
+	if (!szMsg[0])
+	{
+		return PLUGIN_HANDLED
+	}
 	func_SendMessage(id, szMsg)
 
 	return PLUGIN_HANDLED
@@ -66,6 +71,11 @@ public CMD_SayTeam(id)
 	new szMsg[192]
 	read_args(szMsg, charsmax(szMsg))
 	remove_quotes(szMsg)
+	trim(szMsg)
+	if (!szMsg[0])
+	{
+		return PLUGIN_HANDLED
+	}
 	func_SendMessage(id, szMsg, true)
 
 	return PLUGIN_HANDLED
@@ -83,6 +93,9 @@ func_SendMessage(id, szMsg[192], bool:bMsgToTeam = false)
 	new szNewMsg[192], szPrefix[64]
 	new iInGameTeam = get_member(id, m_iTeam)
 	new Teams:iPlayerTeam = catchmod_get_user_team(id)
+	new szColor[8]
+	formatcolor(szColor, iInGameTeam, iPlayerTeam)
+	client_print(0, print_chat, "Color After: %s", szColor)
 
 	if (id == 0)
 	{
@@ -92,37 +105,19 @@ func_SendMessage(id, szMsg[192], bool:bMsgToTeam = false)
 	}
 	else if (iInGameTeam != 4)
 	{
-		new szColor[8]
-		
-		if (iInGameTeam == 3)
+		if (bMsgToTeam)
 		{
-			formatex(szColor, charsmax(szColor), "&x05")
+			format(szPrefix, charsmax(szPrefix), "%s%s%s", 
+				is_user_admin(id) ? "&x04[&x01Admin&x04] " : "", 
+				"&x04[&x01Team&x04] ",
+				szColor)
 		}
 		else
 		{
-			switch (iPlayerTeam)
-			{
-				case FLEER:
-				{
-					formatex(szColor, charsmax(szColor), "&x04")
-				}
-
-				case CATCHER:
-				{
-					formatex(szColor, charsmax(szColor), "&x07")
-				}
-
-				case TRAINING:
-				{
-					formatex(szColor, charsmax(szColor), "&x06")
-				}
-			}
+			format(szPrefix, charsmax(szPrefix), "%s%s", 
+				is_user_admin(id) ? "&x04[&x01Admin&x04] " : "",
+				szColor)
 		}
-
-		format(szPrefix, charsmax(szPrefix), "%s%s%s[%s]", 
-			is_user_admin(id) ? "&x04[&x01Admin&x04] &x01" : "", 
-			bMsgToTeam ? "&x04[&x01Team&x04] &x01" : "", 
-			szColor, iInGameTeam == 3 ? "Spec" : g_szTeamsNames[iPlayerTeam])
 	}
 	else 
 	{
@@ -132,7 +127,7 @@ func_SendMessage(id, szMsg[192], bool:bMsgToTeam = false)
 	new szName[32]
 	get_user_name(id, szName, charsmax(szName))
 
-	formatex(szNewMsg, charsmax(szNewMsg), "%s &x01%s: %s", szPrefix, szName, szMsg)
+	formatex(szNewMsg, charsmax(szNewMsg), "%s%s&x01: %s", szPrefix, szName, szMsg)
 
 	switch (bMsgToTeam)
 	{
@@ -156,6 +151,36 @@ func_SendMessage(id, szMsg[192], bool:bMsgToTeam = false)
 			}
 		}
 	}
+}
+
+formatcolor(szColor[8], iTeam, Teams:iStatus)
+{
+	client_print(0, print_chat, "Status: %s", g_szTeamsNames[iStatus])
+	if (iTeam == 3)
+	{
+		formatex(szColor, charsmax(szColor), "&x05")
+	}
+	else
+	{
+		switch (iStatus)
+		{
+			case FLEER:
+			{
+				formatex(szColor, charsmax(szColor), "&x04")
+			}
+
+			case CATCHER:
+			{
+				formatex(szColor, charsmax(szColor), "&x07")
+			}
+
+			case TRAINING:
+			{
+				formatex(szColor, charsmax(szColor), "&x06")
+			}
+		}
+	}
+	client_print(0, print_chat, "Color Before: %s", szColor)
 }
 
 // Stocks

@@ -5,6 +5,9 @@
 
 #include <catch_const>
 
+native catchmod_get_fleers()
+native catchmod_get_catchers()
+
 native Teams:catchmod_get_user_team(id)
 native catchmod_set_user_team(id, Teams:iTeam)
 

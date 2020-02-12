@@ -49,6 +49,8 @@ new bool:g_bJump[MAXPLAYERSVAR]
 new bool:g_bHasSemiclip[MAXPLAYERSVAR]
 new bool:g_bSolid[MAXPLAYERSVAR]
 new bool:g_bSpeedOn[MAXPLAYERSVAR]
+// Forwards
+new g_iFwd_RoundEnd
 // Hud
 enum _:HudEntities
 {
@@ -130,6 +132,9 @@ public plugin_init()
 	RegisterHookChain(RG_CBasePlayer_TraceAttack, "ReapiSupercedeHandler")
 	RegisterHookChain(RG_CBasePlayer_HasRestrictItem, "OnItemHasRestrict")
 
+	// Forwards
+	g_iFwd_RoundEnd = CreateMultiForward("catchmod_round_end", ET_IGNORE, FP_CELL)
+
 	// Cmds
 	register_clcmd("say /speed", "cmd_speed")
 	register_concmd("amx_train", "cmd_train", ADMIN_MAP)
@@ -138,6 +143,11 @@ public plugin_init()
 	// register_clcmd("-cool", "cmd_cool", ADMIN_RCON)
 
 	CC_SetPrefix("^4Catch Mod >>")
+}
+
+public plugin_end()
+{
+	DestroyForward(g_iFwd_RoundEnd)
 }
 	
 // Cmds
@@ -436,7 +446,7 @@ public OnRoundEnd()
 	new iTemp = _:(g_iTeams[1] == CATCHER) + 1
 	get_players_ex(iPlayers, iPlayersNum, GetPlayers_ExcludeDead | GetPlayers_MatchTeam, g_iTeams[1] == FLEER ? "TERRORIST" : "CT")
 
-
+	new iIgnored
 	if (iPlayersNum)
 	{
 		g_iLastWinner = iTemp
@@ -452,7 +462,7 @@ public OnRoundEnd()
 	}
 	else
 	{
-		g_iLastWinner = _:(!bool:(iTemp)) + 1
+		g_iLastWinner = abs(iTemp - 3)
 		client_print(0, print_center, "Catchers won the round!")
 	}
 
@@ -466,6 +476,8 @@ public OnRoundEnd()
 	{
 		SetHookChainArg(1, ATYPE_INTEGER, WINSTATUS_CTS)
 	}
+
+	ExecuteForward(g_iFwd_RoundEnd, iIgnored, g_iLastWinner)
 
 	if (g_iTeams[1] == FLEER)
 	{
@@ -857,7 +869,7 @@ public _native_set_user_turbo()
 
 public _native_get_user_defaultturbo()
 {
-	return g_iTurboDefault[get_param(1)]
+	return g_iTurboDefault[get_param(1)][get_param(2)]
 }
 
 public _native_set_user_defaultturbo()
